@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class JugadorController : MonoBehaviour
 {
@@ -22,6 +23,8 @@ public class JugadorController : MonoBehaviour
     float costeAtaqueEspecial = 5f;
     [Tooltip("El daño que causa a un enemigo cuando lo dispara")]
     float dañoDisparo = 10f;
+    Text marcadorVida;
+    Text marcadorMana;
 
     [Header("Variables para Raycast y el disparo")]
     float rango = 30f;
@@ -35,6 +38,8 @@ public class JugadorController : MonoBehaviour
     void Start()
     {
         cc = gameObject.GetComponent<CharacterController>();
+        marcadorMana = GameObject.Find("Mana").GetComponent<Text>();
+        marcadorVida = GameObject.Find("Vida").GetComponent<Text>();
 
     }
 
@@ -81,7 +86,7 @@ public class JugadorController : MonoBehaviour
             //Se dispara el proyectil. Aunque no haya un enemigo a tiro, debe poderse disarar y gastar la munición
 
             manaActual -= costeDisparo;
-
+            MostrarManaActual();
 
             if (Physics.Raycast(rayo, out hit, rango)) //Sólo golpeará lo primero que esté en su camino; si hay una pared, el proyectil no alcanzará al enemigo
             {
@@ -126,5 +131,17 @@ public class JugadorController : MonoBehaviour
     public void RecibirDaño(float daño)
     {
         vidaActual -= daño;
+        MostrarVidaActual();
     }
+
+    void MostrarVidaActual()
+    {
+        marcadorVida.text = "Vida: "+vidaActual.ToString()+"/"+vidaMaxima;
+    }
+
+    void MostrarManaActual()
+    {
+        marcadorMana.text = "Maná: "+manaActual.ToString()+"/"+manaMaximo;
+    }
+
 }
