@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class JugadorController : MonoBehaviour
 {
@@ -46,6 +47,7 @@ public class JugadorController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        IniciarEmboscada();
         if (!estaMuerto)
 
         {
@@ -142,6 +144,18 @@ public class JugadorController : MonoBehaviour
     void MostrarManaActual()
     {
         marcadorMana.text = "Maná: "+manaActual.ToString()+"/"+manaMaximo;
+    }
+
+    void IniciarEmboscada()
+    {
+        if (Input.GetButtonDown("Cancel"))
+        {
+            List<GameObject> enemigos = GameObject.FindGameObjectsWithTag("Enemigo").ToList();
+            foreach(GameObject enemy in enemigos)
+            {
+                enemy.GetComponent<IAEnemigo>().enabled = true;
+            }
+        }
     }
 
 }

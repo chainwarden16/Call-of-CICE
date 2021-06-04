@@ -21,13 +21,13 @@ public class IAEnemigo : MonoBehaviour
 
     [Header("Estadísticas del enemigo")]
     public float vidaActual;
-    float velocidadMovimiento = 30f;
+    public float velocidadMovimiento = 9f;
     public float daño;
     bool estaMuerto = false;
     const float multiplicadorDañoColor = 2f;
 
     [Header("Físicas del enemigo y corrector de deltaTime")]
-    Rigidbody rigidBody;
+    CharacterController charCon;
     const float correctorDeltaTime = 60f;
 
     [Header("Variables de comportamiento del enemigo")]
@@ -38,6 +38,7 @@ public class IAEnemigo : MonoBehaviour
     public float rangoPersecucion;
     [Tooltip("Define el tiempo que tiene que pasar entre ataque y ataque. Si no, la máquina atacaría al objetivo una vez por frame y lo mataría al instante")]
     public float tiempoRecargaAtaque;
+    float tiempoCambioDireccion = 1f;
     [Tooltip("Determina a quién está atacando, por si debe cambiar el foco")]
     GameObject objetivoActual;
 
@@ -45,7 +46,7 @@ public class IAEnemigo : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        rigidBody = GetComponent<Rigidbody>();
+        charCon = gameObject.GetComponent<CharacterController>();
     }
 
     // Update is called once per frame
@@ -55,6 +56,8 @@ public class IAEnemigo : MonoBehaviour
         {
             Morir();
             BuscarJugadorOAliado();
+            CambiarDireccion();
+
         }
     }
 
@@ -104,12 +107,17 @@ public class IAEnemigo : MonoBehaviour
     void BuscarJugadorOAliado()
     {
         List<GameObject> oponentes = GameObject.FindGameObjectsWithTag("Aliado").ToList();
-        oponentes.Add(GameObject.FindGameObjectsWithTag("Player").FirstOrDefault());
+        oponentes.Add(GameObject.FindGameObjectsWithTag("Player").First());
 
         switch (comportamiento)
         {
 
             case ComportamientoEnemigo.Patrulla:
+
+                //El enemigo se mueve en una dirección
+
+                charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+
                 if (objetivoActual == null) //hay que buscar a alguien con quien luchar, siempre que esté en el rango de detección
                 {
                     foreach (GameObject gam in oponentes)
@@ -125,19 +133,67 @@ public class IAEnemigo : MonoBehaviour
                 }
                 else //si ya tiene un enemigo fijado, que entre en modo persecución 
                 {
-                    
+
                     comportamiento = ComportamientoEnemigo.Persecucion;
 
                 }
                 break;
             case ComportamientoEnemigo.Persecucion:
+
+                float distanciaObjetivo = Vector3.Distance(transform.position, objetivoActual.transform.position);
+
                 transform.LookAt(objetivoActual.transform.position);
-                rigidBody.velocity = transform.forward * correctorDeltaTime * Time.deltaTime * velocidadMovimiento;
+                charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+
+                if (distanciaObjetivo > rangoPersecucion)
+                {
+                    comportamiento = ComportamientoEnemigo.Patrulla;
+                    objetivoActual = null;
+                }
+
                 break;
             case ComportamientoEnemigo.Ataque:
                 break;
         }
     }
 
+    void CambiarDireccion()
+    {
+        if (comportamiento == ComportamientoEnemigo.Patrulla) //se comprueba si el enemigo está patrullando para decidir en qué dirección se girará
+        {
+
+            tiempoCambioDireccion -= Time.deltaTime;
+
+            if (tiempoCambioDireccion < 0) //si el tiempo ha expirado, se mirará en qué dirección patrullará esta vez
+
+            {
+
+                float rand = Random.Range(0, 4);
+                switch (rand)
+                {
+                    case 0:
+                        gameObject.transform.rotation = Quaternion.Euler(0, 90, 0);
+                        break;
+                    case 1:
+                        gameObject.transform.rotation = Quaternion.Euler(0, 180, 0);
+
+                        break;
+                    case 2:
+                        gameObject.transform.rotation = Quaternion.Euler(0, 270, 0);
+                        break;
+                    default:
+                        break; //en este caso, no se gira nada
+
+                }
+
+                tiempoCambioDireccion = 1f;
+
+            }
+
+        }
+
+    }
 
 }
+
+

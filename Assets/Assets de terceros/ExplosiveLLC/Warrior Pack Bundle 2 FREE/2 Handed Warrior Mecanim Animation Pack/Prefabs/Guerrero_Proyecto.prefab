@@ -12,7 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 746c4982e3e2ef54d8d3649534723e63, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  comp: 0
+  vidaActual: 100
+  "da\xF1o": 10
+  comportamiento: 0
+  tipo: 1
+  rangoAtaque: 10
+  rangoPersecucion: 25
+  tiempoRecargaAtaque: 0.5
 --- !u!1001 &2426323281287903561
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -26,15 +32,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6718588461118409735, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 10.676582
+      value: 91.7
       objectReference: {fileID: 0}
     - target: {fileID: 6718588461118409735, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -5.8
       objectReference: {fileID: 0}
     - target: {fileID: 6718588461118409735, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 12.314007
+      value: -110.8
       objectReference: {fileID: 0}
     - target: {fileID: 6718588461118409735, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
       propertyPath: m_LocalRotation.w
@@ -71,6 +77,18 @@ PrefabInstance:
     - target: {fileID: 6718588461118902311, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
       propertyPath: m_TagString
       value: Enemigo
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176300833385260308, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
+      propertyPath: m_Mass
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176300833385260308, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
+      propertyPath: m_UseGravity
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7176300833385260308, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
+      propertyPath: m_IsKinematic
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8678467469152559404, guid: 338097dc3c0187f42a8a49e673ed32d4, type: 3}
