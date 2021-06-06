@@ -28,7 +28,7 @@ public class JugadorController : MonoBehaviour
     Text marcadorMana;
 
     [Header("Variables para Raycast y el disparo")]
-    float rango = 30f;
+    float rango = 25f;
 
     [Header("Control de respawn")]
     [Tooltip("Si es true, deberá mostrarse una pantalla indicándolo y la posibilidad de cargar partida desde el GameManager")]
@@ -51,6 +51,8 @@ public class JugadorController : MonoBehaviour
         if (!estaMuerto)
 
         {
+            //Control de la vida
+            Morir();
 
             //Control de movimiento del personaje. Prefiero usar GetAxisRaw para detener al personaje en seco en cuanto el jugador deje de pulsar el botón
             moviX = Input.GetAxisRaw("Horizontal") * Time.deltaTime * correctorDelta;
@@ -65,8 +67,6 @@ public class JugadorController : MonoBehaviour
             //Control de disparo, el maná y el ataque especial
             Disparar();
             UsarAtaqueEspecial();
-            //Control de la vida
-            Morir();
 
         }
 
@@ -126,13 +126,23 @@ public class JugadorController : MonoBehaviour
             estaMuerto = true;
             Debug.Log("EstaMuerto es " + estaMuerto);
             GameObject.Find("Main Camera").GetComponent<CamaraController>().enabled = false; //se desactiva la cámara para quitarle el control total al jugador
+            gameObject.tag = "Untagged";
             //Se llama a la pantalla de fin de partida desde el GameManager
         }
     }
 
     public void RecibirDaño(float daño)
     {
-        vidaActual -= daño;
+        float vidaRestante = vidaActual - daño;
+        if (vidaRestante < 0)
+        {
+            vidaActual = 0;
+        }
+        else
+        {
+            vidaActual = vidaRestante;
+        }
+        
         MostrarVidaActual();
     }
 
@@ -155,6 +165,12 @@ public class JugadorController : MonoBehaviour
             {
                 enemy.GetComponent<IAEnemigo>().enabled = true;
             }
+            List<GameObject> aliados = GameObject.FindGameObjectsWithTag("Aliado").ToList();
+            foreach(GameObject ali in aliados)
+            {
+                ali.GetComponent<IAAliado>().enabled = true;
+            }
+            
         }
     }
 

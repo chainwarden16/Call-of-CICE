@@ -10,7 +10,8 @@ public class IAEnemigo : MonoBehaviour
     {
         Patrulla,
         Persecucion,
-        Ataque
+        Ataque,
+        FinPartida
     }
 
     public enum TipoEnemigo
@@ -21,8 +22,8 @@ public class IAEnemigo : MonoBehaviour
 
     [Header("Estadísticas del enemigo")]
     public float vidaActual;
-    public float velocidadMovimiento = 9f;
-    public float daño;
+    float velocidadMovimiento = 23f;
+    float daño;
     bool estaMuerto = false;
     const float multiplicadorDañoColor = 2f;
 
@@ -34,19 +35,39 @@ public class IAEnemigo : MonoBehaviour
     public ComportamientoEnemigo comportamiento = ComportamientoEnemigo.Patrulla;
     [Tooltip("Esto determina su rango de persecución y de ataque, así como sus estadísticas (daño & vida)")]
     public TipoEnemigo tipo;
-    public float rangoAtaque;
-    public float rangoPersecucion;
+    float rangoAtaque;
+    float rangoPersecucion = 25;
     [Tooltip("Define el tiempo que tiene que pasar entre ataque y ataque. Si no, la máquina atacaría al objetivo una vez por frame y lo mataría al instante")]
-    public float tiempoRecargaAtaque;
-    float tiempoCambioDireccion = 1f;
+    float tiempoRecargaAtaque;
+    float contadorSiguienteAtaque = 0f;
     [Tooltip("Determina a quién está atacando, por si debe cambiar el foco")]
     GameObject objetivoActual;
+    float tiempoCambioDireccion = 1f;
 
 
     // Start is called before the first frame update
     void Start()
     {
         charCon = gameObject.GetComponent<CharacterController>();
+        switch (tipo)
+        {
+            case TipoEnemigo.Arquero:
+
+                vidaActual = 60f;
+                daño = 5f;
+                rangoAtaque = 20f;
+                tiempoRecargaAtaque = 1f;
+
+                break;
+            case TipoEnemigo.Espadachin:
+
+                vidaActual = 120f;
+                daño = 10f;
+                rangoAtaque = 15f;
+                tiempoRecargaAtaque = 0.5f;
+
+                break;
+        }
     }
 
     // Update is called once per frame
@@ -107,7 +128,19 @@ public class IAEnemigo : MonoBehaviour
     void BuscarJugadorOAliado()
     {
         List<GameObject> oponentes = GameObject.FindGameObjectsWithTag("Aliado").ToList();
-        oponentes.Add(GameObject.FindGameObjectsWithTag("Player").First());
+
+        GameObject jugador = GameObject.FindGameObjectsWithTag("Player").FirstOrDefault();
+
+        if (jugador != null)
+        {
+
+            oponentes.Add(jugador);
+
+        }
+        else
+        {
+            comportamiento = ComportamientoEnemigo.FinPartida;
+        }
 
         switch (comportamiento)
         {
@@ -127,7 +160,7 @@ public class IAEnemigo : MonoBehaviour
                         {
                             objetivoActual = gam;
                             comportamiento = ComportamientoEnemigo.Persecucion;
-                            Debug.Log("El objetivo actual es: " + objetivoActual);
+
                         }
                     }
                 }
@@ -140,19 +173,60 @@ public class IAEnemigo : MonoBehaviour
                 break;
             case ComportamientoEnemigo.Persecucion:
 
-                float distanciaObjetivo = Vector3.Distance(transform.position, objetivoActual.transform.position);
+                if (objetivoActual != null)
+                {
 
-                transform.LookAt(objetivoActual.transform.position);
-                charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+                    float distanciaObjetivo = Vector3.Distance(transform.position, objetivoActual.transform.position);
 
-                if (distanciaObjetivo > rangoPersecucion)
+                    transform.LookAt(objetivoActual.transform.position);
+                    charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+
+                    if (distanciaObjetivo > rangoPersecucion)
+                    {
+                        comportamiento = ComportamientoEnemigo.Patrulla;
+                        objetivoActual = null;
+                    }
+                    else if (distanciaObjetivo <= rangoAtaque)
+                    {
+                        comportamiento = ComportamientoEnemigo.Ataque;
+                    }
+
+                }
+                else
                 {
                     comportamiento = ComportamientoEnemigo.Patrulla;
-                    objetivoActual = null;
                 }
+
 
                 break;
             case ComportamientoEnemigo.Ataque:
+
+                if (objetivoActual != null)
+                {
+
+                    transform.LookAt(objetivoActual.transform.position); //encara al enemigo y va a por él
+                    charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+                    float disObjetivoActual = Vector3.Distance(objetivoActual.transform.position, transform.position); //calcula la distancia a la que está el objetivo
+
+                    if (disObjetivoActual > rangoAtaque)
+                    {
+                        comportamiento = ComportamientoEnemigo.Persecucion; //si se ha salido del rango de ataque, lo perseguirá
+                    }
+                    else
+                    {
+                        Disparar(); //si no, atacará
+
+                    }
+
+
+                }
+                else
+                {
+                    comportamiento = ComportamientoEnemigo.Patrulla;
+                }
+
+                break;
+            case ComportamientoEnemigo.FinPartida: //no hacen nada porque el jugador ha muerto y el juego se "detiene"
                 break;
         }
     }
@@ -192,6 +266,95 @@ public class IAEnemigo : MonoBehaviour
 
         }
 
+    }
+
+    void Disparar()
+    {
+        if (contadorSiguienteAtaque <= 0) //si es momento de disparar, se calcula a qué está apuntando el enemigo (en este caso, será lo que tenga enfrente dentro de su rango)
+        {
+
+            Vector3 direccion = transform.forward;
+
+            direccion = direccion.normalized;
+
+            Ray rayo = new Ray(transform.position, direccion); //el npc atacará en dirección recta desde donde esté mirando en ese momento
+
+            RaycastHit hit;
+
+            if (Physics.Raycast(rayo, out hit, rangoAtaque)) //Sólo golpeará lo primero que esté en su camino; si hay una pared, el proyectil no alcanzará al objetivo
+            {
+                //Se mira si se apunta a un aliado mediante Raycast
+                ComprobarSiYaEstaMuerto(hit);
+
+            }
+
+            contadorSiguienteAtaque = tiempoRecargaAtaque; //ahora deberá esperar a que pase un tiempo para volver a atacar. Los enemigos a melé tienen un tiempo de recarga menor y hacen más daño
+
+        }
+        else
+        {
+            contadorSiguienteAtaque -= Time.deltaTime;
+        }
+    }
+
+    void ComprobarSiYaEstaMuerto(RaycastHit hit)
+    {
+
+        if (hit.collider.tag == "Aliado") //si apunta a un aliado, le hace daño
+        {
+
+            IAAliado golpeado = hit.collider.gameObject.GetComponent<IAAliado>();
+
+            if (golpeado.vidaActual - daño <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y deberá buscar otro, de haberlo
+            {
+                objetivoActual = null;
+                comportamiento = ComportamientoEnemigo.Patrulla;
+            }
+
+            golpeado.RecibirDaño(daño);
+        }
+        else if (hit.collider.tag == "Player") //en este caso, apunta al jugador
+        {
+            JugadorController golpeado = hit.collider.gameObject.GetComponent<JugadorController>();
+
+            if (golpeado.vidaActual - daño <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y el GameManager deberá llamar a la pantalla de Game Over
+            {
+                objetivoActual = null;
+                comportamiento = ComportamientoEnemigo.FinPartida;
+            }
+
+            golpeado.RecibirDaño(daño);
+
+        }
+
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if(collision.gameObject.tag == "Player") 
+        {
+            JugadorController golpeado = collision.gameObject.GetComponent<JugadorController>();
+
+            if (golpeado.vidaActual - daño <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y deberá buscar otro, de haberlo
+            {
+                objetivoActual = null;
+                comportamiento = ComportamientoEnemigo.Patrulla;
+            }
+
+            golpeado.RecibirDaño(daño);
+        }
+        else if(collision.gameObject.tag == "Aliado")
+        {
+            IAAliado golpeado = collision.gameObject.GetComponent<IAAliado>();
+
+            if (golpeado.vidaActual - daño <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y deberá buscar otro, de haberlo
+            {
+                objetivoActual = null;
+                comportamiento = ComportamientoEnemigo.Patrulla;
+            }
+
+            golpeado.RecibirDaño(daño);
+        }
     }
 
 }
