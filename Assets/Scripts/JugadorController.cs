@@ -16,10 +16,10 @@ public class JugadorController : MonoBehaviour
 
     [Header("Vida y munición del personaje")]
     [Tooltip("La vida y el maná actuales se usarán en otra clase, así que deben ser públicos")]
-    public float vidaActual = 100f;
-    float vidaMaxima = 100f;
-    public float manaActual = 20f;
-    float manaMaximo = 20f;
+    public float vidaActual;
+    public float vidaMaxima = 100f;
+    public float manaActual;
+    public float manaMaximo = 20f;
     float costeDisparo = 1f;
     float costeAtaqueEspecial = 5f;
     [Tooltip("El daño que causa a un enemigo cuando lo dispara")]
@@ -34,6 +34,9 @@ public class JugadorController : MonoBehaviour
     [Tooltip("Si es true, deberá mostrarse una pantalla indicándolo y la posibilidad de cargar partida desde el GameManager")]
     public bool estaMuerto = false;
 
+    [Header("Efectos visuales sobre el jugador")]
+    ParticleSystem particulas;
+
 
     // Start is called before the first frame update
     void Start()
@@ -41,20 +44,23 @@ public class JugadorController : MonoBehaviour
         cc = gameObject.GetComponent<CharacterController>();
         marcadorMana = GameObject.Find("Mana").GetComponent<Text>();
         marcadorVida = GameObject.Find("Vida").GetComponent<Text>();
-
+        particulas = GetComponent<ParticleSystem>();
+        vidaActual = PlayerPrefs.GetFloat("Vida", vidaMaxima);
+        manaActual = PlayerPrefs.GetFloat("Mana", manaMaximo);
     }
 
     // Update is called once per frame
     void Update()
     {
-        IniciarEmboscada();
         if (!estaMuerto)
 
         {
+            IniciarEmboscada();
             //Control de la vida
             Morir();
 
             //Control de movimiento del personaje. Prefiero usar GetAxisRaw para detener al personaje en seco en cuanto el jugador deje de pulsar el botón
+            moviX = Input.GetAxisRaw("Horizontal") * Time.deltaTime * correctorDelta;
             moviX = Input.GetAxisRaw("Horizontal") * Time.deltaTime * correctorDelta;
             moviZ = Input.GetAxisRaw("Vertical") * Time.deltaTime * correctorDelta;
 
@@ -92,8 +98,8 @@ public class JugadorController : MonoBehaviour
 
             if (Physics.Raycast(rayo, out hit, rango)) //Sólo golpeará lo primero que esté en su camino; si hay una pared, el proyectil no alcanzará al enemigo
             {
-                 //Se mira si se apunta a un enemigo mediante Raycast
-                if(hit.collider.tag == "Enemigo")
+                //Se mira si se apunta a un enemigo mediante Raycast
+                if (hit.collider.tag == "Enemigo")
                 {
 
                     IAEnemigo golpeado = hit.collider.gameObject.GetComponent<IAEnemigo>();
@@ -127,6 +133,7 @@ public class JugadorController : MonoBehaviour
             Debug.Log("EstaMuerto es " + estaMuerto);
             GameObject.Find("Main Camera").GetComponent<CamaraController>().enabled = false; //se desactiva la cámara para quitarle el control total al jugador
             gameObject.tag = "Untagged";
+
             //Se llama a la pantalla de fin de partida desde el GameManager
         }
     }
@@ -142,18 +149,20 @@ public class JugadorController : MonoBehaviour
         {
             vidaActual = vidaRestante;
         }
-        
+
+
+        particulas.Play();
         MostrarVidaActual();
     }
 
-    void MostrarVidaActual()
+    public void MostrarVidaActual()
     {
-        marcadorVida.text = "Vida: "+vidaActual.ToString()+"/"+vidaMaxima;
+        marcadorVida.text = "Vida: " + vidaActual.ToString() + "/" + vidaMaxima;
     }
 
-    void MostrarManaActual()
+    public void MostrarManaActual()
     {
-        marcadorMana.text = "Maná: "+manaActual.ToString()+"/"+manaMaximo;
+        marcadorMana.text = "Maná: " + manaActual.ToString() + "/" + manaMaximo;
     }
 
     void IniciarEmboscada()
@@ -161,17 +170,19 @@ public class JugadorController : MonoBehaviour
         if (Input.GetButtonDown("Cancel"))
         {
             List<GameObject> enemigos = GameObject.FindGameObjectsWithTag("Enemigo").ToList();
-            foreach(GameObject enemy in enemigos)
+            foreach (GameObject enemy in enemigos)
             {
                 enemy.GetComponent<IAEnemigo>().enabled = true;
             }
             List<GameObject> aliados = GameObject.FindGameObjectsWithTag("Aliado").ToList();
-            foreach(GameObject ali in aliados)
+            foreach (GameObject ali in aliados)
             {
                 ali.GetComponent<IAAliado>().enabled = true;
             }
-            
+
         }
     }
+
+    
 
 }

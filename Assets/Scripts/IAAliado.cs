@@ -12,21 +12,17 @@ public class IAAliado : MonoBehaviour
         FinPartida
     }
 
-    [Header("Vida y estadísticas del aliado")]
-    [Tooltip("La vida actual se usará en otra clase, así que deben ser públicos")]
-    public float vidaActual = 70f;
+    [Header("Estadísticas del aliado")]
     [Tooltip("El daño que causa a un enemigo cuando dispara. Será menor que el del jugador")]
-    float dañoDisparo = 7f;
+    float dañoDisparo = 9f;
     [Tooltip("Atacan más lento que él, pero tendrán munición infinita")]
-    float tiempoRecargaAtaque = 1.5f;
-    float velocidadMovimiento = 20f;
+    float tiempoRecargaAtaque = 1f;
 
     [Header("Físicas del aliado y corrección de deltaTime")]
     CharacterController cCon;
-    const float correctorDeltaTime = 60f;
 
     [Header("Variables para Raycast y el disparo")]
-    float rango = 14f;
+    float rango = 350f;
     [Tooltip("Define el tiempo que tiene que pasar entre ataque y ataque. Si no, la máquina atacaría al objetivo una vez por frame y lo mataría al instante")]
     float contadorSiguienteAtaque = 0f;
     [Tooltip("Determina a quién está atacando, por si debe cambiar el foco")]
@@ -47,7 +43,6 @@ public class IAAliado : MonoBehaviour
 
     private void Update()
     {
-        Morir();
         BuscarEnemigos();
     }
 
@@ -79,7 +74,7 @@ public class IAAliado : MonoBehaviour
                 else //si ya tiene un enemigo fijado, que entre en modo persecución 
                 {
                     transform.LookAt(objetivoActual.transform.position);
-                    cCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+                    
                     float distancia = Vector3.Distance(transform.position, objetivoActual.transform.position);
                     if (distancia < rango)
                     {
@@ -97,7 +92,7 @@ public class IAAliado : MonoBehaviour
 
                     Debug.Log("El objetivo del aliado ahora es: " + objetivoActual.name);
                     transform.LookAt(objetivoActual.transform.position); //encara al enemigo y va a por él
-                    cCon.SimpleMove(-transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento); //trata de mantener la distancia con el enemigo mientras ataca
+                    
                     float disObjetivoActual = Vector3.Distance(transform.position, objetivoActual.transform.position); //calcula la distancia a la que está el objetivo
 
                     if (disObjetivoActual > rango)
@@ -123,23 +118,6 @@ public class IAAliado : MonoBehaviour
         }
     }
 
-
-
-    void Morir()
-    {
-        if (vidaActual <= 0)
-        {
-            estaMuerto = true;
-            //Faltan las partículas
-            Destroy(gameObject);
-        }
-    }
-
-    public void RecibirDaño(float daño)
-    {
-        vidaActual -= daño;
-        Debug.Log(vidaActual);
-    }
 
     void Disparar()
     {
@@ -176,7 +154,7 @@ public class IAAliado : MonoBehaviour
         if (hit.collider.tag == "Enemigo") //si apunta a un enemigo, le hace daño
         {
 
-            IAAliado golpeado = hit.collider.gameObject.GetComponent<IAAliado>();
+            IAEnemigo golpeado = hit.collider.gameObject.GetComponent<IAEnemigo>();
 
             if (golpeado.vidaActual - dañoDisparo <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y deberá buscar otro, de haberlo
             {

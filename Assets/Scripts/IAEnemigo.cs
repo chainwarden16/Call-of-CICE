@@ -22,7 +22,7 @@ public class IAEnemigo : MonoBehaviour
 
     [Header("Estadísticas del enemigo")]
     public float vidaActual;
-    float velocidadMovimiento = 23f;
+    float velocidadMovimiento = 20f;
     float daño;
     bool estaMuerto = false;
     const float multiplicadorDañoColor = 2f;
@@ -44,8 +44,11 @@ public class IAEnemigo : MonoBehaviour
     GameObject objetivoActual;
     float tiempoCambioDireccion = 1f;
 
+    [Header("Efectos visuales sobre el enemigo")]
+    ParticleSystem particulas;
+    ParticleSystem.EmissionModule emision;
 
-    // Start is called before the first frame update
+
     void Start()
     {
         charCon = gameObject.GetComponent<CharacterController>();
@@ -63,14 +66,16 @@ public class IAEnemigo : MonoBehaviour
 
                 vidaActual = 120f;
                 daño = 10f;
-                rangoAtaque = 15f;
+                rangoAtaque = 5f;
                 tiempoRecargaAtaque = 0.5f;
 
                 break;
         }
+
+        particulas = gameObject.GetComponent<ParticleSystem>();
+        emision = particulas.emission;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!estaMuerto)
@@ -109,7 +114,7 @@ public class IAEnemigo : MonoBehaviour
                 com.GetComponent<SkinnedMeshRenderer>().material.color = col;
             }
         }
-        Debug.Log("La vida del enemigo es: " + vidaActual);
+        particulas.Play();
     }
 
     /// <summary>
@@ -121,26 +126,28 @@ public class IAEnemigo : MonoBehaviour
         {
             estaMuerto = true;
             //faltan las partículas
-            Destroy(gameObject, 3);
+            particulas.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            emision.rateOverTime = 40f;
+            var configSisPart = particulas.main;
+            configSisPart.startLifetime = 2f;
+            configSisPart.duration = 2f;
+            particulas.Play();
+            gameObject.tag = "Untagged"; //deja de ser marcado como enemigo para que los aliados dejen de atacarlo y busquen a otro objetivo
+            Destroy(gameObject, 2);
         }
     }
 
     void BuscarJugadorOAliado()
     {
-        List<GameObject> oponentes = GameObject.FindGameObjectsWithTag("Aliado").ToList();
 
         GameObject jugador = GameObject.FindGameObjectsWithTag("Player").FirstOrDefault();
 
-        if (jugador != null)
-        {
 
-            oponentes.Add(jugador);
-
-        }
-        else
+        if (jugador == null)
         {
             comportamiento = ComportamientoEnemigo.FinPartida;
         }
+
 
         switch (comportamiento)
         {
@@ -153,16 +160,15 @@ public class IAEnemigo : MonoBehaviour
 
                 if (objetivoActual == null) //hay que buscar a alguien con quien luchar, siempre que esté en el rango de detección
                 {
-                    foreach (GameObject gam in oponentes)
-                    {
-                        float distancia = Vector3.Distance(gam.transform.position, transform.position);
-                        if (distancia < rangoPersecucion)
-                        {
-                            objetivoActual = gam;
-                            comportamiento = ComportamientoEnemigo.Persecucion;
 
-                        }
+                    float distancia = Vector3.Distance(jugador.transform.position, transform.position);
+                    if (distancia < rangoPersecucion)
+                    {
+                        objetivoActual = jugador;
+                        comportamiento = ComportamientoEnemigo.Persecucion;
+
                     }
+
                 }
                 else //si ya tiene un enemigo fijado, que entre en modo persecución 
                 {
@@ -300,20 +306,7 @@ public class IAEnemigo : MonoBehaviour
     void ComprobarSiYaEstaMuerto(RaycastHit hit)
     {
 
-        if (hit.collider.tag == "Aliado") //si apunta a un aliado, le hace daño
-        {
-
-            IAAliado golpeado = hit.collider.gameObject.GetComponent<IAAliado>();
-
-            if (golpeado.vidaActual - daño <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y deberá buscar otro, de haberlo
-            {
-                objetivoActual = null;
-                comportamiento = ComportamientoEnemigo.Patrulla;
-            }
-
-            golpeado.RecibirDaño(daño);
-        }
-        else if (hit.collider.tag == "Player") //en este caso, apunta al jugador
+        if (hit.collider.tag == "Player") //en este caso, apunta al jugador
         {
             JugadorController golpeado = hit.collider.gameObject.GetComponent<JugadorController>();
 
@@ -327,34 +320,6 @@ public class IAEnemigo : MonoBehaviour
 
         }
 
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        if(collision.gameObject.tag == "Player") 
-        {
-            JugadorController golpeado = collision.gameObject.GetComponent<JugadorController>();
-
-            if (golpeado.vidaActual - daño <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y deberá buscar otro, de haberlo
-            {
-                objetivoActual = null;
-                comportamiento = ComportamientoEnemigo.Patrulla;
-            }
-
-            golpeado.RecibirDaño(daño);
-        }
-        else if(collision.gameObject.tag == "Aliado")
-        {
-            IAAliado golpeado = collision.gameObject.GetComponent<IAAliado>();
-
-            if (golpeado.vidaActual - daño <= 0) //si el objetivo va a morir con este ataque, entonces deja de ser un objetivo en el siguiente frame y deberá buscar otro, de haberlo
-            {
-                objetivoActual = null;
-                comportamiento = ComportamientoEnemigo.Patrulla;
-            }
-
-            golpeado.RecibirDaño(daño);
-        }
     }
 
 }
