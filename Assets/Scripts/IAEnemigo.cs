@@ -22,7 +22,8 @@ public class IAEnemigo : MonoBehaviour
 
     [Header("Estadísticas del enemigo")]
     public float vidaActual;
-    float velocidadMovimiento = 20f;
+    public float velocidadMovimiento = 7f;
+    public float velocidadActual = 7f;
     float daño;
     bool estaMuerto = false;
     const float multiplicadorDañoColor = 2f;
@@ -47,6 +48,9 @@ public class IAEnemigo : MonoBehaviour
     [Header("Efectos visuales sobre el enemigo")]
     ParticleSystem particulas;
     ParticleSystem.EmissionModule emision;
+
+    [Header("GameManager")]
+    GameManager manager;
 
 
     void Start()
@@ -74,6 +78,7 @@ public class IAEnemigo : MonoBehaviour
 
         particulas = gameObject.GetComponent<ParticleSystem>();
         emision = particulas.emission;
+        manager = GameObject.Find("Game Manager").GetComponent<GameManager>();
     }
 
     void Update()
@@ -134,6 +139,7 @@ public class IAEnemigo : MonoBehaviour
             particulas.Play();
             gameObject.tag = "Untagged"; //deja de ser marcado como enemigo para que los aliados dejen de atacarlo y busquen a otro objetivo
             Destroy(gameObject, 2);
+            manager.BuscarEnemigos();
         }
     }
 
@@ -156,7 +162,7 @@ public class IAEnemigo : MonoBehaviour
 
                 //El enemigo se mueve en una dirección
 
-                charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+                charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadActual);
 
                 if (objetivoActual == null) //hay que buscar a alguien con quien luchar, siempre que esté en el rango de detección
                 {
@@ -185,7 +191,7 @@ public class IAEnemigo : MonoBehaviour
                     float distanciaObjetivo = Vector3.Distance(transform.position, objetivoActual.transform.position);
 
                     transform.LookAt(objetivoActual.transform.position);
-                    charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+                    charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadActual);
 
                     if (distanciaObjetivo > rangoPersecucion)
                     {
@@ -211,8 +217,14 @@ public class IAEnemigo : MonoBehaviour
                 {
 
                     transform.LookAt(objetivoActual.transform.position); //encara al enemigo y va a por él
-                    charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadMovimiento);
+
                     float disObjetivoActual = Vector3.Distance(objetivoActual.transform.position, transform.position); //calcula la distancia a la que está el objetivo
+
+                    if (disObjetivoActual > 2f)
+                    {
+                        charCon.SimpleMove(transform.forward * Time.deltaTime * correctorDeltaTime * velocidadActual);
+
+                    }
 
                     if (disObjetivoActual > rangoAtaque)
                     {

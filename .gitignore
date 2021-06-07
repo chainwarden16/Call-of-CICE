@@ -35,3 +35,17 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+Assets/Scenes/Final.unity
+Assets/Scenes/Final.unity.meta
+Assets/Scenes/PrimeraBatalla.unity
+Assets/Scenes/PrimeraBatalla.unity.meta
+Assets/Scenes/SampleScene.unity
+Assets/Scenes/SampleScene.unity
+Assets/Scenes/SegundaBatalla.unity
+Assets/Scenes/SegundaBatalla.unity.meta
+Assets/Scenes/Titulo.unity
+Assets/Scenes/Titulo.unity.meta
+Assets/Scenes/Tutorial.unity
+Assets/Scenes/Tutorial.unity.meta
+Assets/Scenes/SampleScene.unity
+Assets/Scenes/SampleScene.unity.meta

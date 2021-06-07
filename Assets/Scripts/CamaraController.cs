@@ -19,7 +19,7 @@ public class CamaraController : MonoBehaviour
     void Start()
     {
         transJugador = GameObject.Find("Jugador").transform;
-        Debug.Log(transJugador.name);
+
         controlGiro = transJugador.eulerAngles;
     }
 

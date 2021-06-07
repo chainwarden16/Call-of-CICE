@@ -6,6 +6,10 @@ using UnityEngine.SceneManagement;
 public class GuardarPartida : MonoBehaviour
 {
 
+    /// <summary>
+    /// En cuanto el jugador entre en el checkpoint, se guardará su vida, maná y escena actual completada, para juego llamar a la siguiente que corresponda
+    /// </summary>
+    /// <param name="other"></param>
     private void OnTriggerEnter(Collider other)
     {
         if (other.tag == "Player")

@@ -32,13 +32,16 @@ public class IAAliado : MonoBehaviour
     [Tooltip("Los aliados sólo hacen tres cosas: buscar el enemigo más cercano, atacarlo hasta que o bien el enemigo muera, o el propio aliado lo haga y quedarse quieto cuando no quedan enemigos (o el jugador muere).")]
     TipoComportamiento comportamiento = TipoComportamiento.Busqueda;
 
-
     [Tooltip("Si es true, deberá ser destruido")]
     public bool estaMuerto = false;
+
+    [Header("Game Manager")]
+    GameManager manager;
 
     private void Start()
     {
         cCon = gameObject.GetComponent<CharacterController>();
+        manager = GameObject.Find("Game Manager").GetComponent<GameManager>();
     }
 
     private void Update()
@@ -48,7 +51,7 @@ public class IAAliado : MonoBehaviour
 
     void BuscarEnemigos()
     {
-        List<GameObject> enemigos = GameObject.FindGameObjectsWithTag("Enemigo").ToList();
+        List<GameObject> enemigos = manager.enemigosRestantes;
 
         GameObject jugador = GameObject.FindGameObjectsWithTag("Player").FirstOrDefault();
 
@@ -68,7 +71,7 @@ public class IAAliado : MonoBehaviour
 
                     int aleatorio = Random.Range(0, enemigos.Count - 1);
                     objetivoActual = enemigos[aleatorio];
-                    Debug.Log("El objetivo del aliado es: " + objetivoActual.name);
+
 
                 }
                 else //si ya tiene un enemigo fijado, que entre en modo persecución 
@@ -90,7 +93,7 @@ public class IAAliado : MonoBehaviour
                 if (objetivoActual != null)
                 {
 
-                    Debug.Log("El objetivo del aliado ahora es: " + objetivoActual.name);
+
                     transform.LookAt(objetivoActual.transform.position); //encara al enemigo y va a por él
                     
                     float disObjetivoActual = Vector3.Distance(transform.position, objetivoActual.transform.position); //calcula la distancia a la que está el objetivo

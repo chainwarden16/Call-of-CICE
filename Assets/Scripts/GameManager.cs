@@ -8,20 +8,23 @@ using UnityEngine.UI;
 public class GameManager : MonoBehaviour
 {
     [Header("Control de enemigos restantes en el combate y el jugador")]
-    public static List<GameObject> enemigosRestantes;
-    Text textoEnemigosRestantes;
+    public List<GameObject> enemigosRestantes;
+    static Text textoEnemigosRestantes;
 
     [Tooltip("Monitorea el estado del jugador para determinar si está vivo o no")]
     GameObject jugador;
     Text textoFinPartida;
+    [Tooltip("Primitiva que actúa como fondo translúcido para la pantalla de game over")]
     GameObject fondoFinPartida;
+    public bool haIniciadoCombate = false;
 
-    [Tooltip("Procura que sólo haya un objeto GameManager en la escena")]
-    GameManager manager;
-
+    [Header("Control de respawn y el propio Manager")]
     [Tooltip("Checkpoint que sirve también como punto de guardado")]
     GameObject checkpoint;
     bool haAparecidoCheckpoint = false;
+
+    [Tooltip("Procura que sólo haya un objeto GameManager en la escena")]
+    GameManager manager;
 
     private void Start()
     {
@@ -32,39 +35,50 @@ public class GameManager : MonoBehaviour
         checkpoint = GameObject.Find("Checkpoint");
         //checkpoint.GetComponentInChildren<ParticleSystem>().Stop();
         checkpoint.GetComponent<GuardarPartida>().enabled = false;
-        BuscarEnemigosTrasRespawn();
+        BuscarEnemigos();
     }
 
     private void Update()
     {
-        if (!jugador.GetComponent<JugadorController>().estaMuerto)
+        if (haIniciadoCombate)
         {
-            BuscarEnemigosTrasRespawn();
-            if (enemigosRestantes.Count == 0 && !haAparecidoCheckpoint) 
+
+            if (!jugador.GetComponent<JugadorController>().estaMuerto)
             {
-                HacerAparecerCheckpoint();
-                haAparecidoCheckpoint = true;
+                
+                if (enemigosRestantes.Count == 0 && !haAparecidoCheckpoint)
+                {
+                    HacerAparecerCheckpoint();
+                    haAparecidoCheckpoint = true;
+                }
             }
+            else
+            {
+                fondoFinPartida.GetComponent<MeshRenderer>().enabled = true;
+                textoFinPartida.text = "Has muerto. Presiona la tecla Espacio para revivir o Esc para cerrar el juego.";
+                if (Input.GetButtonDown("Jump"))
+                {
+                    fondoFinPartida.GetComponent<MeshRenderer>().enabled = false;
+                    RevivirJugador();
+
+                }
+                else if (Input.GetButtonDown("CerrarJuego"))
+                {
+                    Application.Quit();
+                }
+            }
+
         }
         else
         {
-            fondoFinPartida.GetComponent<MeshRenderer>().enabled = true;
-            textoFinPartida.text = "Has muerto. Presiona la tecla Espacio para revivir o Esc para cerrar el juego.";
-            if (Input.GetButtonDown("Jump"))
-            {
-                fondoFinPartida.GetComponent<MeshRenderer>().enabled = false;
-                RevivirJugador();
-
-            }
-            else if (Input.GetButtonDown("CerrarJuego"))
-            {
-                Application.Quit();
-            }
+            IniciarEmboscada();
         }
 
     }
 
-
+    /// <summary>
+    /// Permite cargar la partida a partir de PlayerPrefs si se cierra la sesión o si matan al personaje durante la misma. Si no hay Playerprefs, entonces se toma la escena 0 (el título) por defecto
+    /// </summary>
     public static void CargarPartida()
     {
 
@@ -89,24 +103,34 @@ public class GameManager : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// Carga la escena seleccionada dentro de la build
+    /// </summary>
+    /// <param name="escena"></param>
     public static void CargarEscena(int escena)
     {
         SceneManager.LoadScene(escena);
     }
 
+    /// <summary>
+    /// Permite al jugador recargar la última escena en la que ha muerto, incluso si cierra el juego
+    /// </summary>
     void RevivirJugador()
     {
         Scene escena = SceneManager.GetActiveScene();
         SceneManager.LoadScene(escena.name);
-        BuscarEnemigosTrasRespawn();
+        BuscarEnemigos();
     }
 
-    void BuscarEnemigosTrasRespawn()
+    public void BuscarEnemigos()
     {
         enemigosRestantes = GameObject.FindGameObjectsWithTag("Enemigo").ToList();
         textoEnemigosRestantes.text = "Enemigos restantes: " + enemigosRestantes.Count;
     }
 
+    /// <summary>
+    /// Una vez todos los enemigos han muerto, el GameManager hace aparecer el checkpoint del nivel correspondiente
+    /// </summary>
     void HacerAparecerCheckpoint()
     {
         checkpoint.GetComponent<MeshRenderer>().enabled = true;
@@ -114,6 +138,26 @@ public class GameManager : MonoBehaviour
         checkpoint.GetComponent<GuardarPartida>().enabled = true;
         checkpoint.GetComponentInChildren<ParticleSystem>().Play();
         checkpoint.transform.Translate(0, 100, 0);
-        
+
+    }
+
+    void IniciarEmboscada()
+    {
+        if (Input.GetButtonDown("Cancel") && !haIniciadoCombate)
+        {
+            List<GameObject> enemigos = GameObject.FindGameObjectsWithTag("Enemigo").ToList();
+            foreach (GameObject enemy in enemigos)
+            {
+                enemy.GetComponent<IAEnemigo>().enabled = true;
+            }
+            List<GameObject> aliados = GameObject.FindGameObjectsWithTag("Aliado").ToList();
+            foreach (GameObject ali in aliados)
+            {
+                ali.GetComponent<IAAliado>().enabled = true;
+            }
+
+            haIniciadoCombate = true;
+
+        }
     }
 }

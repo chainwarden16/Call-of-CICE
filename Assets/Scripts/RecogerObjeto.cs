@@ -19,13 +19,13 @@ public class RecogerObjeto : MonoBehaviour
             {
                 if (jc.vidaActual > jc.vidaMaxima / 2)
                 {
-                    jc.vidaActual = jc.vidaMaxima - jc.vidaActual;
+                    jc.vidaActual = jc.vidaMaxima;
                     jc.MostrarVidaActual();
                 }
                 else
                 {
 
-                    jc.vidaActual = jc.vidaMaxima / 2;
+                    jc.vidaActual += jc.vidaMaxima / 2;
                     jc.MostrarVidaActual();
 
                 }
