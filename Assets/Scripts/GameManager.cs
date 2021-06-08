@@ -82,8 +82,8 @@ public class GameManager : MonoBehaviour
     public static void CargarPartida()
     {
 
-        int escena = PlayerPrefs.GetInt("Escena", 0);
-
+        int escena = PlayerPrefs.GetInt("Escena",0);
+        Debug.Log(PlayerPrefs.GetInt("Escena"));
         switch (escena)
         {
             case 0: //Título
@@ -107,9 +107,9 @@ public class GameManager : MonoBehaviour
     /// Carga la escena seleccionada dentro de la build
     /// </summary>
     /// <param name="escena"></param>
-    public static void CargarEscena(int escena)
+    public static void IniciarPartida()
     {
-        SceneManager.LoadScene(escena);
+        SceneManager.LoadScene("Tutorial");
     }
 
     /// <summary>
