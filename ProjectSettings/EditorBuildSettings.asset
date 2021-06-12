@@ -6,14 +6,14 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/PrimeraBatalla.unity
-    guid: 9fc0d4010bbf28b4594072e72b8655ab
-  - enabled: 1
     path: Assets/Scenes/Titulo.unity
     guid: af7cf431e6d711e449013054a728a4e9
   - enabled: 1
     path: Assets/Scenes/Tutorial.unity
     guid: 1b0e74a33c92bee4095ff99d0c75ed2d
+  - enabled: 1
+    path: Assets/Scenes/PrimeraBatalla.unity
+    guid: 9fc0d4010bbf28b4594072e72b8655ab
   - enabled: 1
     path: Assets/Scenes/SegundaBatalla.unity
     guid: d887fc93e5a29fb4fae7430067f6302b

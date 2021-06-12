@@ -9,7 +9,7 @@ public class CamaraController : MonoBehaviour
     Transform transJugador;
     float moviX;
     float moviY;
-    float velGiro = 20f;
+    float velGiro = 15f;
     float correctorDeltaTime = 60f;
     float minimoClamp = -90f;
     float maximoClamp = 90f;

@@ -1,5 +1,35 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1073007057
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1073007058}
+  m_Layer: 0
+  m_Name: PiesJugador
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1073007058
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1073007057}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: -1.12, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 3536598066021625479}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3536598066021625472
 GameObject:
   m_ObjectHideFlags: 0
@@ -28,6 +58,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 3536598066585232890}
+  - {fileID: 1073007058}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -80,7 +111,7 @@ CharacterController:
   m_SlopeLimit: 45
   m_StepOffset: 0.5
   m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
+  m_MinMoveDistance: 0
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &3536598066585232891
 MonoBehaviour:
@@ -94,9 +125,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b2bb8608bc2125148833556d9fa3d29b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vidaActual: 100000
-  manaActual: 20
+  vidaActual: 100
+  vidaMaxima: 100
+  manaActual: 100
+  manaMaximo: 100
   estaMuerto: 0
+  ataqueEspecial: {fileID: 5882745515919978077, guid: 3d5d2e6a452edf4438e7f22715e340f1, type: 3}
 --- !u!1 &3536598067397355610
 GameObject:
   m_ObjectHideFlags: 0

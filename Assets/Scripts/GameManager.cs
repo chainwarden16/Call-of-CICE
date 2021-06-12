@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour
     public List<GameObject> enemigosRestantes;
     static Text textoEnemigosRestantes;
 
+
     [Tooltip("Monitorea el estado del jugador para determinar si está vivo o no")]
     GameObject jugador;
     Text textoFinPartida;
@@ -55,7 +56,7 @@ public class GameManager : MonoBehaviour
             else
             {
                 fondoFinPartida.GetComponent<MeshRenderer>().enabled = true;
-                textoFinPartida.text = "Has muerto. Presiona la tecla Espacio para revivir o Esc para cerrar el juego.";
+                textoFinPartida.text = "Has muerto. Presiona la tecla Espacio para revivir o R para cerrar el juego.";
                 if (Input.GetButtonDown("Jump"))
                 {
                     fondoFinPartida.GetComponent<MeshRenderer>().enabled = false;
@@ -128,6 +129,11 @@ public class GameManager : MonoBehaviour
         textoEnemigosRestantes.text = "Enemigos restantes: " + enemigosRestantes.Count;
     }
 
+    public void EliminarTextoCombate()
+    {
+        textoEnemigosRestantes.text = "";
+    }
+
     /// <summary>
     /// Una vez todos los enemigos han muerto, el GameManager hace aparecer el checkpoint del nivel correspondiente
     /// </summary>
@@ -143,8 +149,11 @@ public class GameManager : MonoBehaviour
 
     void IniciarEmboscada()
     {
+        
         if (Input.GetButtonDown("Cancel") && !haIniciadoCombate)
         {
+            textoFinPartida.text = "";
+            fondoFinPartida.GetComponent<MeshRenderer>().enabled = false;
             List<GameObject> enemigos = GameObject.FindGameObjectsWithTag("Enemigo").ToList();
             foreach (GameObject enemy in enemigos)
             {

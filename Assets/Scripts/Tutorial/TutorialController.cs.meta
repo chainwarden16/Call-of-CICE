@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: d313b7c686bc1ed43a5b2bb7f94b1cc0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cielo: {fileID: 2100000, guid: 2039a0ad0a9d05549928b70362f54902, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

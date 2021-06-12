@@ -43,6 +43,8 @@ public class JugadorController : MonoBehaviour
     public GameObject ataqueEspecial;
     [Tooltip("El objeto a crear y destruir en escena durante el invocado y expiración del ataque especial. Instancia al prefab ya cargado y así se evita tener que acceder a los recursos del juego cada vez que se use")]
     GameObject ataqueEspecialEnEscena;
+    [Tooltip("Texto que muestra al jugador cuánto tiempo queda para que el ataque especial vuelva a estar disponible")]
+    Text textoTiempoConjuro;
     [Tooltip("Determina la posición en la que aparecerá")]
     static GameObject piesJugador;
     [Tooltip("Calcula el tiempo que le queda al efecto. No es lo mismo que el tiempo de enfriamiento (mayor que el de la duracion)")]
@@ -69,6 +71,7 @@ public class JugadorController : MonoBehaviour
         manaActual = PlayerPrefs.GetFloat("Mana", manaMaximo);
         piesJugador = GameObject.Find("PiesJugador");
         manager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+        textoTiempoConjuro = GameObject.Find("TiempoAtaqueEspecial").GetComponent<Text>();
         MostrarManaActual();
         MostrarVidaActual();
     }
@@ -86,7 +89,6 @@ public class JugadorController : MonoBehaviour
                     Morir();
 
                 //Control de movimiento del personaje. Prefiero usar GetAxisRaw para detener al personaje en seco en cuanto el jugador deje de pulsar el botón
-                moviX = Input.GetAxisRaw("Horizontal") * Time.deltaTime * correctorDelta;
                 moviX = Input.GetAxisRaw("Horizontal") * Time.deltaTime * correctorDelta;
                 moviZ = Input.GetAxisRaw("Vertical") * Time.deltaTime * correctorDelta;
 
@@ -140,7 +142,6 @@ public class JugadorController : MonoBehaviour
 
 
             }
-            Debug.Log("Maná actual: " + manaActual);
         }
     }
 
@@ -151,9 +152,10 @@ public class JugadorController : MonoBehaviour
     void UsarAtaqueEspecial()
     {
 
-            Debug.Log(cc.isGrounded);
+
         if (tiempoEnfriamientoRestante <= 0) //debe haber concluido el tiempo de enfriamiento. No puedo colocarlo en el if anterior porque necesito descontar el tiempo únicamente si no ha expirado ya, independientemente de las condiciones anteriores
         {
+            textoTiempoConjuro.text = "Conjuro listo";
             if (Input.GetButtonDown("Fire2") && manaActual - costeAtaqueEspecial >= 0 && cc.isGrounded) //el jugador deberá presionar el botón secundario del ratón, tener maná suficiente y estar en el suelo para activar este efecto, pero además...
             {
                 piesJugador.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - offsetAltura, gameObject.transform.position.z);
@@ -167,6 +169,7 @@ public class JugadorController : MonoBehaviour
         else
         {
             tiempoEnfriamientoRestante -= Time.deltaTime;
+            textoTiempoConjuro.text = "Conjuro listo en: " + tiempoEnfriamientoRestante.ToString("F1");
 
             if (ataqueEspecialEnEscena != null) //si el ataque especial todavía perdura, descuenta
             {
