@@ -16,7 +16,7 @@ public class IniciarPartida : MonoBehaviour
     {
         if (Input.GetButtonDown("Submit"))
         {
-
+            PlayerPrefs.DeleteAll();
             GameManager.IniciarPartida();
 
         }else if (Input.GetButtonDown("Cancel"))

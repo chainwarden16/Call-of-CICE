@@ -17,7 +17,8 @@ public class IAEnemigo : MonoBehaviour
     public enum TipoEnemigo
     {
         Arquero,
-        Espadachin
+        Espadachin,
+        Caballero
     }
 
     [Header("Estadísticas del enemigo")]
@@ -72,6 +73,13 @@ public class IAEnemigo : MonoBehaviour
                 daño = 10f;
                 rangoAtaque = 5f;
                 tiempoRecargaAtaque = 0.5f;
+                break;
+
+            case TipoEnemigo.Caballero:
+                vidaActual = 160f;
+                daño = 20f;
+                rangoAtaque = 7f;
+                tiempoRecargaAtaque = 0.9f;
 
                 break;
         }
