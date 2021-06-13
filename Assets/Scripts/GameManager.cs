@@ -7,6 +7,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    #region Variables
     [Header("Control de enemigos restantes en el combate y el jugador")]
     public List<GameObject> enemigosRestantes;
     static Text textoEnemigosRestantes;
@@ -27,6 +28,8 @@ public class GameManager : MonoBehaviour
     [Tooltip("Procura que sólo haya un objeto GameManager en la escena")]
     GameManager manager;
 
+    #endregion
+
     private void Start()
     {
         jugador = GameObject.FindGameObjectWithTag("Player");
@@ -34,7 +37,6 @@ public class GameManager : MonoBehaviour
         textoFinPartida = GameObject.Find("FinJuego").GetComponent<Text>();
         fondoFinPartida = GameObject.Find("FondoNegro");
         checkpoint = GameObject.Find("Checkpoint");
-        //checkpoint.GetComponentInChildren<ParticleSystem>().Stop();
         checkpoint.GetComponent<GuardarPartida>().enabled = false;
         BuscarEnemigos();
     }
@@ -77,6 +79,9 @@ public class GameManager : MonoBehaviour
 
     }
 
+
+    #region Cargado de escenas
+
     /// <summary>
     /// Permite cargar la partida a partir de PlayerPrefs si se cierra la sesión o si matan al personaje durante la misma. Si no hay Playerprefs, entonces se toma la escena 0 (el título) por defecto
     /// </summary>
@@ -112,6 +117,10 @@ public class GameManager : MonoBehaviour
     {
         SceneManager.LoadScene("Tutorial");
     }
+
+    #endregion
+
+    #region Funciones de control de estado del combate
 
     /// <summary>
     /// Permite al jugador recargar la última escena en la que ha muerto, incluso si cierra el juego
@@ -169,4 +178,6 @@ public class GameManager : MonoBehaviour
 
         }
     }
+
+    #endregion
 }

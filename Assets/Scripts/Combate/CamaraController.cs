@@ -4,17 +4,20 @@ using UnityEngine;
 
 public class CamaraController : MonoBehaviour
 {
-    // Start is called before the first frame update
+    #region Variables
+
     [Tooltip("Toma el transform del padre (el jugador) para limitar el giro")]
     Transform transJugador;
     float moviX;
     float moviY;
-    float velGiro = 15f;
+    float velGiro = 5f;
     float correctorDeltaTime = 60f;
     float minimoClamp = -90f;
     float maximoClamp = 90f;
 
     Vector3 controlGiro;
+
+    #endregion
 
     void Start()
     {
@@ -23,7 +26,7 @@ public class CamaraController : MonoBehaviour
         controlGiro = transJugador.eulerAngles;
     }
 
-    // Update is called once per frame
+
     void LateUpdate()
     {
         moviY = Input.GetAxis("Mouse X") * Time.deltaTime * correctorDeltaTime * velGiro;

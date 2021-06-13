@@ -5,6 +5,9 @@ using System.Linq;
 
 public class IAAliado : MonoBehaviour
 {
+
+    #region Variables
+
     enum TipoComportamiento
     {
         Busqueda,
@@ -38,6 +41,8 @@ public class IAAliado : MonoBehaviour
     [Header("Game Manager")]
     GameManager manager;
 
+    #endregion
+
     private void Start()
     {
         cCon = gameObject.GetComponent<CharacterController>();
@@ -49,6 +54,11 @@ public class IAAliado : MonoBehaviour
         BuscarEnemigos();
     }
 
+    #region Acciones de los aliados
+
+    /// <summary>
+    /// Busca a un enemigo para dispararle
+    /// </summary>
     void BuscarEnemigos()
     {
         List<GameObject> enemigos = manager.enemigosRestantes;
@@ -121,7 +131,9 @@ public class IAAliado : MonoBehaviour
         }
     }
 
-
+    /// <summary>
+    /// Si el enemigo sigue vivo, el aliado efectuará un disparo (siempre que no esté en enfriamiento)
+    /// </summary>
     void Disparar()
     {
         if (contadorSiguienteAtaque <= 0) //si es momento de disparar, se calcula a qué está apuntando el enemigo (en este caso, será lo que tenga enfrente dentro de su rango)
@@ -151,6 +163,10 @@ public class IAAliado : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// El aliado dañará al enemigo en cuestión y cambiará de objetivo al morir éste
+    /// </summary>
+    /// <param name="hit"></param>
     void ComprobarSiYaEstaMuerto(RaycastHit hit)
     {
 
@@ -169,5 +185,7 @@ public class IAAliado : MonoBehaviour
         }
         
     }
+
+    #endregion
 
 }

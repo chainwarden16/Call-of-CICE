@@ -19,7 +19,7 @@ public class GuardarPartida : MonoBehaviour
             PlayerPrefs.SetFloat("Mana", jc.manaActual);
             PlayerPrefs.SetInt("Escena", SceneManager.GetActiveScene().buildIndex); //dependiendo de lo que valga este número, se cargará la siguiente escena que corresponda, incluso si concluye la sesión
             GameManager.CargarPartida();
-            //Destroy(gameObject);
+
         }
     }
 }

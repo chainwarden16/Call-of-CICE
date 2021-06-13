@@ -6,6 +6,7 @@ using System.Linq;
 public class IAEnemigo : MonoBehaviour
 {
 
+    #region Variables
     public enum ComportamientoEnemigo
     {
         Patrulla,
@@ -23,8 +24,9 @@ public class IAEnemigo : MonoBehaviour
 
     [Header("Estadísticas del enemigo")]
     public float vidaActual;
-    public float velocidadMovimiento = 7f;
-    public float velocidadActual = 7f;
+    public float vidaMaxima;
+    public float velocidadMovimiento;
+    public float velocidadActual;
     float daño;
     bool estaMuerto = false;
     const float multiplicadorDañoColor = 2f;
@@ -50,9 +52,10 @@ public class IAEnemigo : MonoBehaviour
     ParticleSystem particulas;
     ParticleSystem.EmissionModule emision;
 
+
     [Header("GameManager")]
     GameManager manager;
-
+    #endregion
 
     void Start()
     {
@@ -62,31 +65,39 @@ public class IAEnemigo : MonoBehaviour
             case TipoEnemigo.Arquero:
 
                 vidaActual = 60f;
+                vidaMaxima = 60f;
                 daño = 5f;
                 rangoAtaque = 20f;
                 tiempoRecargaAtaque = 1f;
-
+                velocidadMovimiento = 7f;
+                velocidadActual = 7f;
                 break;
             case TipoEnemigo.Espadachin:
 
                 vidaActual = 120f;
+                vidaMaxima = 120f;
                 daño = 10f;
                 rangoAtaque = 5f;
                 tiempoRecargaAtaque = 0.5f;
+                velocidadMovimiento = 8f;
+                velocidadActual = 8f;
                 break;
 
             case TipoEnemigo.Caballero:
                 vidaActual = 160f;
+                vidaMaxima = 160f;
                 daño = 20f;
                 rangoAtaque = 7f;
                 tiempoRecargaAtaque = 0.9f;
-
+                velocidadMovimiento = 7f;
+                velocidadActual = 7f;
                 break;
         }
 
         particulas = gameObject.GetComponent<ParticleSystem>();
         emision = particulas.emission;
         manager = GameObject.Find("Game Manager").GetComponent<GameManager>();
+        
     }
 
     void Update()
@@ -100,59 +111,15 @@ public class IAEnemigo : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Se llama desde JugadorController al dsparar y acertar a un enemigo. Resta vida al enemigo y lo vuelve más azulado para representar la carga de daño actual
-    /// </summary>
-    /// <param name="daño">El daño entrante. Los aliados del jugador no golpean con la misma fuerza que éste y la coloración azulada cambia según el daño recibido</param>
-    public void RecibirDaño(float daño)
-    {
-        vidaActual -= daño;
-
-
-        SkinnedMeshRenderer[] componentes = gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
-        foreach (SkinnedMeshRenderer com in componentes)
-        {
-            Color32 col = com.material.color;
-            if (col.r - daño * multiplicadorDañoColor > 30)
-
-            {
-
-                col = new Color32((byte)(col.r - daño * multiplicadorDañoColor), 255, 255, 255);
-                com.GetComponent<SkinnedMeshRenderer>().material.color = col;
-
-            }
-            else
-            {
-                col = new Color32(0, 255, 255, 255);
-                com.GetComponent<SkinnedMeshRenderer>().material.color = col;
-            }
-        }
-        particulas.Play();
-    }
-
-    /// <summary>
-    /// Destruye a un enemigo cuando su vida es 0, tras mostrar un efecto de partículas
-    /// </summary>
-    void Morir()
-    {
-        if (vidaActual <= 0)
-        {
-            estaMuerto = true;
-            //faltan las partículas
-            particulas.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            emision.rateOverTime = 40f;
-            var configSisPart = particulas.main;
-            configSisPart.startLifetime = 2f;
-            configSisPart.duration = 2f;
-            particulas.Play();
-            gameObject.tag = "Untagged"; //deja de ser marcado como enemigo para que los aliados dejen de atacarlo y busquen a otro objetivo
-            Destroy(gameObject, 2);
-            manager.BuscarEnemigos();
-        }
-    }
+    #region Comportamiento y acciones del enemigo
 
     void BuscarJugadorOAliado()
     {
+
+        if(transform.position.y < -2) //si el enemigo sale de los limites del mapa, es destruido para evitar que el juego sufra un softlock
+        {
+            Destroy(gameObject);
+        }
 
         GameObject jugador = GameObject.FindGameObjectsWithTag("Player").FirstOrDefault();
 
@@ -195,7 +162,11 @@ public class IAEnemigo : MonoBehaviour
 
                 if (objetivoActual != null)
                 {
-
+                    if(tipo == TipoEnemigo.Caballero)
+                    {
+                        velocidadMovimiento = 11f;
+                        velocidadActual = 11f;
+                    }
                     float distanciaObjetivo = Vector3.Distance(transform.position, objetivoActual.transform.position);
 
                     transform.LookAt(objetivoActual.transform.position);
@@ -215,6 +186,11 @@ public class IAEnemigo : MonoBehaviour
                 else
                 {
                     comportamiento = ComportamientoEnemigo.Patrulla;
+                    if (tipo == TipoEnemigo.Caballero)
+                    {
+                        velocidadMovimiento = 7f;
+                        velocidadActual = 7f;
+                    }
                 }
 
 
@@ -323,6 +299,9 @@ public class IAEnemigo : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Métodos para reducir vida y destruir al enemigo al morir
     void ComprobarSiYaEstaMuerto(RaycastHit hit)
     {
 
@@ -341,6 +320,60 @@ public class IAEnemigo : MonoBehaviour
         }
 
     }
+
+    /// <summary>
+    /// Se llama desde JugadorController al dsparar y acertar a un enemigo. Resta vida al enemigo y lo vuelve más azulado para representar la carga de daño actual
+    /// </summary>
+    /// <param name="daño">El daño entrante. Los aliados del jugador no golpean con la misma fuerza que éste y la coloración azulada cambia según el daño recibido</param>
+    public void RecibirDaño(float daño)
+    {
+        vidaActual -= daño;
+
+
+        SkinnedMeshRenderer[] componentes = gameObject.GetComponentsInChildren<SkinnedMeshRenderer>();
+        foreach (SkinnedMeshRenderer com in componentes)
+        {
+            Color32 col = com.material.color;
+            if (col.r - daño * multiplicadorDañoColor > 30)
+
+            {
+
+                col = new Color32((byte)(col.r - daño * multiplicadorDañoColor), 255, 255, 255);
+                com.GetComponent<SkinnedMeshRenderer>().material.color = col;
+
+            }
+            else
+            {
+                col = new Color32(0, 255, 255, 255);
+                com.GetComponent<SkinnedMeshRenderer>().material.color = col;
+            }
+        }
+        particulas.Play();
+    }
+    
+    /// <summary>
+    /// Destruye a un enemigo cuando su vida es 0, tras mostrar un efecto de partículas
+    /// </summary>
+    void Morir()
+    {
+        if (vidaActual <= 0)
+        {
+            estaMuerto = true;
+
+            particulas.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            emision.rateOverTime = 40f;
+            var configSisPart = particulas.main;
+            configSisPart.startLifetime = 2f;
+            configSisPart.duration = 2f;
+            particulas.Play();
+            gameObject.tag = "Untagged"; //deja de ser marcado como enemigo para que los aliados dejen de atacarlo y busquen a otro objetivo
+            Destroy(gameObject, 2);
+            manager.BuscarEnemigos();
+        }
+    }
+
+    #endregion
+
 
 }
 

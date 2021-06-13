@@ -15,7 +15,7 @@ public class RecogerObjeto : MonoBehaviour
         if (collid.gameObject.tag == "Player")
         {
             JugadorController jc = collid.gameObject.GetComponent<JugadorController>();
-            if (gameObject.tag == "PocionVida" && jc.vidaActual < jc.vidaMaxima)
+            if (gameObject.tag == "PocionVida")
             {
                 if (jc.vidaActual > jc.vidaMaxima / 2)
                 {
@@ -30,7 +30,7 @@ public class RecogerObjeto : MonoBehaviour
 
                 }
             }
-            else if (gameObject.tag == "PocionMana" && jc.manaActual < jc.manaMaximo)
+            else if (gameObject.tag == "PocionMana")
             {
                 jc.manaActual = jc.manaMaximo;
                 jc.MostrarManaActual();

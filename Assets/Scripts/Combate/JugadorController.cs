@@ -3,9 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
+using System;
 
 public class JugadorController : MonoBehaviour
 {
+    #region Variables
+
     [Header("Variables para controlar el movimiento")]
     CharacterController cc;
     float moviX;
@@ -13,6 +16,7 @@ public class JugadorController : MonoBehaviour
     float velocidadMov = 10.0f;
     float correctorDelta = 60f;
     Vector3 vectorVelocidadPersonaje;
+    Vector3 posicionInicialJugador;
 
     [Header("Vida y munición del personaje")]
     [Tooltip("La vida y el maná actuales y máximos se usarán en otra clase, así que deben ser públicos")]
@@ -60,7 +64,9 @@ public class JugadorController : MonoBehaviour
     [Header("Game Manager de la escena")]
     GameManager manager;
 
-    // Start is called before the first frame update
+    #endregion
+
+
     void Start()
     {
         cc = gameObject.GetComponent<CharacterController>();
@@ -72,11 +78,12 @@ public class JugadorController : MonoBehaviour
         piesJugador = GameObject.Find("PiesJugador");
         manager = GameObject.Find("Game Manager").GetComponent<GameManager>();
         textoTiempoConjuro = GameObject.Find("TiempoAtaqueEspecial").GetComponent<Text>();
+        posicionInicialJugador = gameObject.transform.position;
         MostrarManaActual();
         MostrarVidaActual();
     }
 
-    // Update is called once per frame
+
     void Update()
     {
         if (manager.haIniciadoCombate)
@@ -85,8 +92,13 @@ public class JugadorController : MonoBehaviour
 
             {
 
-                    //Control de la vida
-                    Morir();
+                if(gameObject.transform.position.y < -2) //si el jugador se cayera del mapa, aparecería en el punto donde comenzó en el mapa actual
+                {
+                    gameObject.transform.position = posicionInicialJugador;
+                }
+
+                //Control de la vida
+                Morir();
 
                 //Control de movimiento del personaje. Prefiero usar GetAxisRaw para detener al personaje en seco en cuanto el jugador deje de pulsar el botón
                 moviX = Input.GetAxisRaw("Horizontal") * Time.deltaTime * correctorDelta;
@@ -94,7 +106,7 @@ public class JugadorController : MonoBehaviour
 
                 vectorVelocidadPersonaje = moviX * transform.right + transform.forward * moviZ;
 
-                vectorVelocidadPersonaje = vectorVelocidadPersonaje.normalized * velocidadMov;
+                CalcularVelocidadDesplazamiento();
 
                 cc.SimpleMove(vectorVelocidadPersonaje);
 
@@ -105,6 +117,15 @@ public class JugadorController : MonoBehaviour
             }
 
         }
+    }
+
+    #region Movimiento y acciones del jugador
+    /// <summary>
+    /// Dictamina la velocidad a la que se mueve el personaje, según si se pulsa el botón del ratón o no
+    /// </summary>
+    void CalcularVelocidadDesplazamiento()
+    {
+        vectorVelocidadPersonaje = vectorVelocidadPersonaje.normalized * (velocidadMov + 5 * Convert.ToInt32(Input.GetButton("Correr")));
     }
 
     /// <summary>
@@ -155,7 +176,15 @@ public class JugadorController : MonoBehaviour
 
         if (tiempoEnfriamientoRestante <= 0) //debe haber concluido el tiempo de enfriamiento. No puedo colocarlo en el if anterior porque necesito descontar el tiempo únicamente si no ha expirado ya, independientemente de las condiciones anteriores
         {
-            textoTiempoConjuro.text = "Conjuro listo";
+            if (manaActual >= 20)
+            {
+                textoTiempoConjuro.text = "Conjuro listo";
+            }
+            else
+            {
+                textoTiempoConjuro.text = "Sin maná \npara el conjuro";
+            }
+
             if (Input.GetButtonDown("Fire2") && manaActual - costeAtaqueEspecial >= 0 && cc.isGrounded) //el jugador deberá presionar el botón secundario del ratón, tener maná suficiente y estar en el suelo para activar este efecto, pero además...
             {
                 piesJugador.transform.position = new Vector3(gameObject.transform.position.x, gameObject.transform.position.y - offsetAltura, gameObject.transform.position.z);
@@ -169,7 +198,16 @@ public class JugadorController : MonoBehaviour
         else
         {
             tiempoEnfriamientoRestante -= Time.deltaTime;
+            if (manaActual >= 20)
+            {
             textoTiempoConjuro.text = "Conjuro listo en: " + tiempoEnfriamientoRestante.ToString("F1");
+
+            }
+            else
+            {
+
+                textoTiempoConjuro.text = "Sin maná \npara el conjuro";
+            }
 
             if (ataqueEspecialEnEscena != null) //si el ataque especial todavía perdura, descuenta
             {
@@ -180,6 +218,9 @@ public class JugadorController : MonoBehaviour
 
     }
 
+    #endregion
+
+    #region Muerte del jugador y actualización de UI
     /// <summary>
     /// Si el jugador pierde toda la vida, morirá, perderá control del personaje y aparecerá el mensaje de fin de partida
     /// </summary>
@@ -241,7 +282,7 @@ public class JugadorController : MonoBehaviour
         {
             temporizadorDuracion = tiempoDuracionEfecto; //se resetea el contador para la próxima vez que se use
             List<GameObject> enemigosVivos = manager.enemigosRestantes.ToList();
-            foreach(GameObject enemy in enemigosVivos)
+            foreach (GameObject enemy in enemigosVivos)
             {
                 enemy.GetComponent<IAEnemigo>().velocidadActual = enemy.GetComponent<IAEnemigo>().velocidadMovimiento;
             }
@@ -254,6 +295,5 @@ public class JugadorController : MonoBehaviour
 
     }
 
-
-
+    #endregion
 }

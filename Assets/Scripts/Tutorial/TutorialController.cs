@@ -52,14 +52,14 @@ public class TutorialController : MonoBehaviour
         switch (contadortexto)
         {
             case 0:
-                textoDialogo.text = "De todos los jóvenes del pueblo, tú eres el que menos esperaba ver aquí. Supongo que habrás oído los rumores sobre los planes de la región de Umbrafor...\n\n (Pulsa Enter para continuar)";
+                textoDialogo.text = "De todos los jóvenes del pueblo, tú eres el que menos esperaba ver aquí. Supongo que habrás oído los rumores sobre los planes de invasión de la región de Umbrafor...\n\n (Pulsa Enter para continuar)";
                 if (Input.GetButtonDown("Submit"))
                 {
                     contadortexto++;
                 }
                 break;
             case 1:
-                textoDialogo.text = "Esos bárbaros no saben vivir fuera de la guerra. De las cinco naciones, eran los únicos en desacuerdo con el tratado de paz... pero no pensaba que te importaría lo suficiente para querer unirte a la misión. " +
+                textoDialogo.text = "Esas sabandijas no saben vivir fuera de la guerra. De las cinco naciones, eran los únicos en desacuerdo con el tratado de paz... pero no pensaba que te importaría lo suficiente para querer unirte a la misión. " +
                     "\n\n¿Acaso has descubierto por fin tu vocación?";
                 if (Input.GetButtonDown("Submit"))
                 {
@@ -70,7 +70,7 @@ public class TutorialController : MonoBehaviour
                 movX = Input.GetAxisRaw("Horizontal");
                 movY = Input.GetAxisRaw("Vertical");
 
-                textoDialogo.text = "En cualquier caso, debo ver si eres capaz de luchar. Empecemos con lo básico... ¿Eres ágil? \n\n(Pulsa las teclas direccionales o WASD para moverte)";
+                textoDialogo.text = "En cualquier caso, debo ver si eres capaz de luchar. Empecemos con lo básico... ¿Eres ágil? \n\n(Pulsa las teclas direccionales o WASD para moverte y la rueda del ratón para correr)";
                 if (movX != 0 || movY != 0)
                 {
 
@@ -127,7 +127,7 @@ public class TutorialController : MonoBehaviour
             case 6:
                 //Instanciar botellas de maná y vida
                 textoDialogo.text = "Un hechizo en área que daña y ralentiza a los oponentes... No está mal para un novato.\n\n Ten en cuenta que tu maná disminuirá con cada disparo y cuando invoques la ventisca. " +
-                    "Esos bárbaros no tendrán piedad contra ti: serás joven, pero pocos sobreviven unas heridas graves.\n\n";
+                    "Esos hombres no tendrán piedad por ti: serás joven, pero pocos sobreviven unas heridas graves.\n\n";
                     
                 if (Input.GetButtonDown("Submit"))
                 {

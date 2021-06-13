@@ -5,9 +5,13 @@ using System.Linq;
 
 public class EfectoAtaqueEspecial : MonoBehaviour
 {
+    #region Variables
+
     List<ParticleSystem> particulas;
     private const float dañoArea = 3f;
 
+    #endregion
+    
     private void Start()
     {
         particulas = GetComponentsInChildren<ParticleSystem>().ToList();
@@ -21,6 +25,8 @@ public class EfectoAtaqueEspecial : MonoBehaviour
             part.transform.Rotate(0, 2, 0);
         }
     }
+
+    #region Efectos al entrar, quedarse y salir del área
 
     /// <summary>
     /// Cuando los enemigos entren en el área, su velocidad será la mitad
@@ -61,4 +67,5 @@ public class EfectoAtaqueEspecial : MonoBehaviour
         }
     }
 
+    #endregion
 }
